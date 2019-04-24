@@ -22,12 +22,9 @@ app.get('/weather', (req, res) => {
 
 const getWeather = () => {
   const darkSkyData = require('./data/darksky.json');
-  let weatherArr = [];
-
-  darkSkyData.daily.data.forEach((dailySet) => {
-    const weather = new Weather(dailySet);
-    weatherArr.push(weather);
-  });
+  const weatherArr = darkSkyData.daily.data.map(x => {
+    return new Weather(x);
+  })
   return weatherArr;
 };
 
@@ -37,8 +34,6 @@ function Weather(data) {
 }
 
 const findLatLong = (query) => {
-  // check for errors
-
   const geoData = require('./data/geo.json');
   const location = new Location(query, geoData);
   return location;
