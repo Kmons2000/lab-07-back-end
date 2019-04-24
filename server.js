@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const superagent = require('superagent')
 require('dotenv').config();
 const port = process.env.PORT || 3000;
 
@@ -8,6 +9,7 @@ app.get('/location', (req, res) => {
   try {
     res.send(findLatLong(req.query.data));
   } catch (error) {
+    console.error(error)
     handleErrors(res);
   }
 });
@@ -33,8 +35,18 @@ function Weather(data) {
   this.time = new Date(data.time * 1000).toString().slice(0, 15);
 }
 
-const findLatLong = (query) => {
-  const geoData = require('./data/geo.json');
+const findLatLong = (query, res) => {
+  let url = `https://maps.googleapis.com/maps/api/geocode/json?addres=${req.query.data}&key=${process.env.GEOKEY}`;
+  return superagent.get(url)
+    .then(res => {
+      console.log(res);
+      response.status(200)
+      response.send(new Location(request.data.query, res))
+    }).catch(error => {
+      response.status(500);
+      response.send(error);
+    })
+  // const geoData = require('./data/geo.json');
   const location = new Location(query, geoData);
   return location;
 };
@@ -49,9 +61,9 @@ function Location(query, data) {
 // ERROR HANDLING
 
 const handleErrors = (res) => {
-  res
-    .status(500)
+  res.status(500)
     .send({ Status: 500, responseText: 'Sorry, something went wrong!' });
+    
 };
 
 app.listen(port, () => console.log('Listening!!!'));
